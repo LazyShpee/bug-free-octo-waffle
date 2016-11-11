@@ -2,23 +2,19 @@ local gameplay = {}
 
 function gameplay.new()
    local gameplay = {}
+   local img  = love.graphics.newImage("explosion.png")
+   gameplay.anim = newAnimation(img, 96, 96, 0.1, 0)
+   gameplay.entities = {}
 
-   function gameplay:init()
-      self.keys = {}
-      for i in pairs(const.keys) do
-	 self.keys[i] = 0
-      end
-      local img  = love.graphics.newImage("explosion.png")
-      self.anim = newAnimation(img, 96, 96, 0.1, 0)
-      self.entities = {}
-   end
-
-   function gameplay:update(dt)
-      if not self.entities then
-	 self:init()
-      end
+   function gameplay:update(dt, keys)
       -- Updates the animation. (Enables frame changes)
       self.anim:update(dt)
+
+      if bool(keys.retour) then -- pause game and come back to menu
+	 frameList.paused = self
+	 return frameList.menu
+      end
+      return self
    end
 
    function gameplay:draw()

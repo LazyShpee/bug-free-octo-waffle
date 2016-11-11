@@ -2,19 +2,13 @@ local menu = {}
 
 function menu.new()
    local menu = {}
+   menu.widgets = {}
 
-   function menu:init()
-      self.keys = {}
-      for i in pairs(const.keys) do
-	 self.keys[i] = 0
+   function menu:update(dt, keys)
+      if bool(keys.play) then -- create gameplay frame or restore paused frame
+	 return frameList.paused and frameList.paused or gameplay:new()
       end
-      self.widgets = {}
-   end
-
-   function menu:update(dt)
-      if not self.widgets then
-	 self:init()
-      end
+      return self
    end
 
    function menu:draw()

@@ -2,27 +2,43 @@ require('lib/AnAL')
 const = require('const')
 require('utils')
 local menu = require('menu')
-local gameplay = require('gameplay')
+gameplay = require('gameplay')
 
+frameList = {}
 local frame = {}
+local keys = {}
 
 function love.load()
-   frame = gameplay:new();
+   for i in pairs(const.keys) do
+      keys[i] = 0
+   end
+   frameList.menu = menu:new()
+   frame = frameList.menu
 end
 
 function love.update(dt)
-   frame:update(dt)
+   frame = frame:update(dt, keys)
 end
 
 function love.draw()
    frame:draw()
 end
 
-function love.keypressed(key, scancode, isrepeat)
-   frame.keys[getIndex(scancode)] = const.keydown + int(isrepeat)
+function debug(scancode)
+   print(scancode)
+   for i, v in pairs(keys) do print(i, v) end
+   print()
+end
+
+function love.keypressed(_, scancode, isrepeat)
+   debug(scancode)
+   keys[getIndex(scancode)] = const.keydown + int(isrepeat)
+   debug(scancode)
    -- should be const.keydown or const.keyrepeat
 end
 
-function love.keyreleased(key, scancode)
-   frame.keys[getIndex(scancode)] = const.keyup
+function love.keyreleased(_, scancode)
+   debug(scancode)
+   keys[getIndex(scancode)] = const.keyup
+   debug(scancode)
 end

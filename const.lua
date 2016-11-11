@@ -8,13 +8,14 @@ const.keyrepeat = 2
 -- supported keys
 const.keys =
    {
-      "escape", -- escape key
-      "right",	-- right arrow key
-      "up",	-- up arrow key
-      "down",	-- down arrow key
-      "space",	-- space bar key
-      "d",	-- D key
-      "c"	-- C key
+      ["retour"] = "escape",
+      ["avancer"] = "right",
+      ["haut"] = "up",
+      ["bas"] = "down",
+      ["sauter"] = "space",
+      ["tricks"] = "d",
+      ["critique"] = "c",
+      ["play"] = "return"
    }
 
 return const
