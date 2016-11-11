@@ -6,10 +6,10 @@ function menu.new()
 
    function menu:update(dt, keys)
       if bool(keys.play) then -- create gameplay frame or restore paused frame
-	 keys.play = const.keyup
-	 return frameList.paused and frameList.paused or gameplay:new()
+	      keys.play = const.keyup
+	      return frameList.paused and frameList.paused or gameplay:new()
       elseif bool(keys.retour) then
-	 love.event.quit()
+	      love.event.quit()
       end
       return self
    end

@@ -1,44 +1,30 @@
-require('lib/AnAL')
-const = require('const')
-require('utils')
-local menu = require('menu')
-gameplay = require('gameplay')
-
-frameList = {}
-local frame = {}
-local keys = {}
+local scroller = require('scroller')
+local newAnim = require('lib/AnAL')
 
 function love.load()
-   for i in pairs(const.keys) do
-      keys[i] = 0
-   end
-   frameList.menu = menu:new()
-   frame = frameList.menu
+    love.graphics.setDefaultFilter('nearest')
+    walls = {
+        'sprites/wall1.png',
+        'sprites/wall2.png'
+    }
+    wallProps = {
+        love.graphics.newImage('sprites/trump.png')
+    }
+    scroll = scroller({sx = 1000})
+    scroll.addImage(walls[1], walls[2])
+    scroll2 = scroller({sx = 900, offset = 50})
+    scroll2.addImage(walls[1], walls[2])
 end
 
 function love.update(dt)
-   frame = frame:update(dt, keys)
+    scroll.update(dt)
+    scroll2.update(dt)
 end
 
 function love.draw()
-   frame:draw()
-end
-
-function debug(scancode)
-   print(scancode)
-   for i, v in pairs(keys) do print(i, v) end
-   print()
-end
-
-function love.keypressed(_, scancode, isrepeat)
-   debug(scancode)
-   keys[getIndex(scancode)] = const.keydown + int(isrepeat)
-   debug(scancode)
-   -- should be const.keydown or const.keyrepeat
-end
-
-function love.keyreleased(_, scancode)
-   debug(scancode)
-   keys[getIndex(scancode)] = const.keyup
-   debug(scancode)
+    love.graphics.push()
+    love.graphics.scale(4, 4)
+    scroll.draw()
+    scroll2.draw()
+    love.graphics.pop()
 end
