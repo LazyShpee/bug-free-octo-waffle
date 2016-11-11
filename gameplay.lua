@@ -11,6 +11,7 @@ function gameplay.new()
       self.anim:update(dt)
 
       if bool(keys.retour) then -- pause game and come back to menu
+	 keys.retour = const.keyup
 	 frameList.paused = self
 	 return frameList.menu
       end
