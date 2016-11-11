@@ -10,7 +10,7 @@ function widgets.sprite(t)
       ), "anim"
    )
    sprite.update = function(dt) sprite.anim:update(dt) end
-   sprite.draw = function() sprite.anim:draw() end
+   sprite.draw = function() sprite.anim:draw(sprite.x, sprite.y) end
    return sprite
 end
 
@@ -24,10 +24,7 @@ widgets.button = la.newFunctionOverLoad()
 
 widgets.button.addFunction({ "sprite" },
    function(sprite)
-      local button = {}
-      button.sprite = sprite
-      button.update = function(dt) sprite.update(dt) end
-      button.draw = function() sprite.draw() end
+      local button = sprite
       return button
    end
 )

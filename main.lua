@@ -1,15 +1,24 @@
-require('lib/AnAL')		-- anal complement to love
+require("lib/AnAL")		-- anal complement to love
 
-const = require('const')	-- global constants variables
+const = require("const")	-- global constants variables
 
-la = require('LuW4ENiF')	-- lazyapi complement to lua
-u = require('utils')		-- ironapi complement to lua
+la = require("LuW4ENiF")	-- lazyapi complement to lua
+u = require("utils")		-- ironapi complement to lua
 
-frames = require('frames')	-- frame based engine complement to love
-widgets = require('widgets')	-- widget complement to frames
+frames = require("frames")	-- frame based engine complement to love
+widgets = require("widgets")	-- widget complement to frames
 local frame = {}
 
+scale = 1			-- adapt to high resolutions
+
 function love.load()
+   local width, height = love.window.getDesktopDimensions()
+   if width >= const.width * 2 or height >= const.height * 2 then
+      scale = 2
+   end
+   love.graphics.setDefaultFilter("nearest")
+   love.window.setMode(const.width * scale, const.height * scale)
+   love.window.setTitle(const.title)
    frame = frames.menu()
    sprite = { -- this is temporary hardcoded I swear
       name = "explosion", firstgid = 1,
@@ -30,7 +39,10 @@ function love.load()
       tilecount = 16,
       tiles = {}
    }
-   table.insert(frame.widgets, widgets.button(widgets.sprite(sprite)))
+   frame.widgets:insert(widgets.button(widgets.sprite(sprite)))
+   frame.widgets:insert(widgets.button(widgets.sprite(deepcopy(sprite))))
+   frame.widgets:insert(widgets.button(widgets.sprite(deepcopy(sprite))))
+   frame.widgets:insert(widgets.button(widgets.sprite(deepcopy(sprite))))
 end
 
 function love.update(dt)
@@ -38,21 +50,24 @@ function love.update(dt)
 end
 
 function love.draw()
+   love.graphics.push()
+   love.graphics.scale(scale, scale)
    frame:draw()
+   love.graphics.pop()
 end
 
 function love.keypressed(_, scancode, isrepeat)
-   print(scancode)
-   for i, v in pairs(frame.keys) do print(i, v) end
+   -- print(scancode)
+   -- for i, v in pairs(frame.keys) do print(i, v) end
    frame.keys[getIndex(scancode)] = const.keydown + int(isrepeat)
-   print()
-   for i, v in pairs(frame.keys) do print(i, v) end
+   -- print()
+   -- for i, v in pairs(frame.keys) do print(i, v) end
 end
 
 function love.keyreleased(_, scancode)
-   print(scancode)
-   for i, v in pairs(frame.keys) do print(i, v) end
+   -- print(scancode)
+   -- for i, v in pairs(frame.keys) do print(i, v) end
    frame.keys[getIndex(scancode)] = const.keyup
-   print()
-   for i, v in pairs(frame.keys) do print(i, v) end
+   -- print()
+   -- for i, v in pairs(frame.keys) do print(i, v) end
 end
