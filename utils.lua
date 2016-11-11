@@ -9,3 +9,5 @@ function getIndex(scancode)
    end
    return 0
 end
+
+function tuple(...) return la.variable.setType({ ... }, "tuple") end
