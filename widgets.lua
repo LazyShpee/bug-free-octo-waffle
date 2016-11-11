@@ -9,7 +9,7 @@ function widgets.sprite(t)
 	 const.delay, 0
       ), "anim"
    )
-   -- sprite.anim:setMode("bounce")
+   sprite.anim:setMode("bounce")
    sprite.update = function(dt) sprite.anim:update(dt) end
    sprite.draw = function() sprite.anim:draw() end
    return sprite
