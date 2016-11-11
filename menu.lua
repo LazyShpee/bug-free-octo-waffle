@@ -1,9 +1,6 @@
-const = require('const')
-require('utils')
+local menu = {}
 
-local namespace = {}
-
-function namespace.new()
+function menu.new()
    local menu = {}
 
    function menu:init()
@@ -14,18 +11,16 @@ function namespace.new()
       self.widgets = {}
    end
 
-   menu.update = function (self, dt)
-      print(self)
+   function menu:update(dt)
       if not self.widgets then
 	 self:init()
       end
    end
 
    function menu:draw()
-      
    end
 
    return menu
 end
 
-return namespace
+return menu

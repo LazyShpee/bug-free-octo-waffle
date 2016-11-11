@@ -8,6 +8,7 @@ const.keyrepeat = 2
 -- supported keys
 const.keys =
    {
+      "escape", -- escape key
       "right",	-- right arrow key
       "up",	-- up arrow key
       "down",	-- down arrow key

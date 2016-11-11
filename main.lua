@@ -1,26 +1,21 @@
 require('lib/AnAL')
 const = require('const')
 require('utils')
-menu = require('menu')
+local menu = require('menu')
+local gameplay = require('gameplay')
 
 local frame = {}
 
 function love.load()
-   local img  = love.graphics.newImage("explosion.png")
-   anim = newAnimation(img, 96, 96, 0.1, 0)
-   frame = menu.new();
+   frame = gameplay:new();
 end
 
 function love.update(dt)
-   frame.update(dt)
-   -- Updates the animation. (Enables frame changes)
-   anim:update(dt)
+   frame:update(dt)
 end
 
 function love.draw()
    frame:draw()
-   -- Draw the animation at (100, 100).
-   anim:draw(100, 100)
 end
 
 function love.keypressed(key, scancode, isrepeat)
