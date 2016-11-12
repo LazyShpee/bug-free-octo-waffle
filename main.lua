@@ -20,7 +20,7 @@ function love.load()
    love.window.setMode(const.width * scale, const.height * scale)
    love.window.setTitle(const.title)
    frame = frames.menu()
-   sprite = { -- this is temporary hardcoded I swear
+   sprite = { -- this is temporarily hardcoded I swear
       name = "explosion", firstgid = 1,
       tilewidth = 96, tileheight = 96,
       spacing = 0, margin = 0,
@@ -50,10 +50,11 @@ function love.update(dt)
 end
 
 function love.draw()
-   love.graphics.push()
-   love.graphics.scale(scale, scale)
-   frame:draw()
-   love.graphics.pop()
+    love.graphics.push()
+    love.graphics.scale(scale, scale)
+    love.graphics.setBackgroundColor(100, 100, 100)
+    frame:draw()
+    love.graphics.pop()
 end
 
 function love.keypressed(_, scancode, isrepeat)
