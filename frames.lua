@@ -70,7 +70,7 @@ function frames.gameplay()
    for i in pairs(const.keys) do
       gameplay.keys[i] = const.keyup
    end
-   gameplay.player = require("gameplay")
+   gameplay.player = require("player")
    gameplay.entities = {}
 
    function gameplay.entities:insert(item)

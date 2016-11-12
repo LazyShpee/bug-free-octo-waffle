@@ -2,8 +2,8 @@ require("lib/AnAL")		-- anal complement to love
 
 const = require("const")	-- global constants variables
 
-la = require("LuW4ENiF")	-- lazyapi complement to lua
-u = require("utils")		-- ironapi complement to lua
+la = require("lib/la")	-- lazyapi complement to lua
+u = require("lib/utils")		-- ironapi complement to lua
 
 frames = require("frames")	-- frame based engine complement to love
 widgets = require("widgets")	-- widget complement to frames
