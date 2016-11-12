@@ -20,29 +20,10 @@ function love.load()
    love.window.setMode(const.width * scale, const.height * scale)
    love.window.setTitle(const.title)
    frame = frames.menu()
-   sprite = { -- this is temporarily hardcoded I swear
-      name = "explosion", firstgid = 1,
-      tilewidth = 96, tileheight = 96,
-      spacing = 0, margin = 0,
-      image = "explosion.png",
-      imagewidth = 480,
-      imageheight = 288,
-      tileoffset = { x = 0, y = 0 },
-      properties = {},
-      terrains = {
-	 {
-	    name = "Nouveau terrain",
-	    tile = -1,
-	    properties = {}
-	 }
-      },
-      tilecount = 16,
-      tiles = {}
-   }
-   frame.widgets:insert(widgets.button(widgets.sprite(sprite)))
-   frame.widgets:insert(widgets.button(widgets.sprite(deepcopy(sprite))))
-   frame.widgets:insert(widgets.button(widgets.sprite(deepcopy(sprite))))
-   frame.widgets:insert(widgets.button(widgets.sprite(deepcopy(sprite))))
+   assets = require("test").tilesets
+   for _, sprite in ipairs(assets) do
+      frame.widgets:insert(widgets.button(widgets.sprite(sprite)))
+   end
 end
 
 function love.update(dt)
