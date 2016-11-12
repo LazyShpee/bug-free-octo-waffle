@@ -12,31 +12,39 @@ function frames.menu()
    end
    menu.widgets = {}
 
-   function menu.widgets:insert(item)
+   function menu.widgets:insert(item, callback)
+      local mt = getmetatable(item) or {}
+      setmetatable(item, mt)
+      if callback then
+	 mt.__call = function(item, self) return callback(self, item) end
+      else
+	 mt.__call = function(item, self) return menu.start(self, item) end
+      end
       table.insert(self, item)
       local ct = 0
       for i, v in ipairs(self) do
-	 ct = ct + v.tileheight
+         ct = ct + v.tileheight
       end
       local offset = (const.height - ct) / (#self + 1)
       ct = 0
       for i, v in ipairs(self) do
-	 v.x = (const.width - v.tilewidth) / 2
-	 v.y = offset * i + ct
-	 ct = ct + v.tileheight
+         v.x = (const.width - v.tilewidth) / 2
+         v.y = offset * i + ct
+         ct = ct + v.tileheight
       end
+      menu.cursor = math.floor(#menu.widgets / 2) + 1
    end
 
    function menu:update(dt)
       -- execute frame handled callbacks
       for i, v in pairs(self.keys) do
-	 local ret = (bool(v) and self[i]) and self[i](self) or nil
-	 if ret then return ret end
+         local ret = (bool(v) and self[i]) and self[i](self) or nil
+         if ret then return ret end
       end
 
       -- update all widgets
       for _, v in ipairs(self.widgets) do
-	 v.update(dt)
+         v.update(dt)
       end
       return self
    end
@@ -44,28 +52,49 @@ function frames.menu()
    function menu:draw()
       -- draw all widgets
       for _, v in ipairs(self.widgets) do
-	 v.draw()
-      glow.set(true)
-	 v.draw()
-      glow.set(false)
+         v.draw()
+	 if v == self.widgets[self.cursor] then
+	    glow.set(true)
+	    v.draw()
+	    glow.set(false)
+	 end
+      end
+   end
+
+   function menu:start(item)
+      -- create gameplay frame or restore paused frame
+      if self.freezed then
+         return self.freezed
+      else
+         local ret = frames.gameplay()
+         ret.freezed = self
+         return ret
       end
    end
 
    function menu:play()
       self.keys.play = const.keyup
-      -- create gameplay frame or restore paused frame
-      if self.freezed then
-	 return self.freezed
-      else
-	 local ret = frames.gameplay()
-	 ret.freezed = self
-	 return ret
-      end
+      return self.widgets[self.cursor](self)
    end
 
    function menu:retour()
       love.event.quit()
    end
+
+   function menu:haut()
+      self.keys.haut = const.keyup
+      if self.widgets[self.cursor - 1] then
+	 self.cursor = self.cursor - 1
+      end
+   end
+
+   function menu:bas()
+      self.keys.bas = const.keyup
+      if self.widgets[self.cursor + 1] then
+	 self.cursor = self.cursor + 1
+      end
+   end
+
    return menu
 end
 
@@ -86,20 +115,20 @@ function frames.gameplay()
    function gameplay:update(dt)
       -- update all entities
       for _, v in ipairs(self.items) do
-	 v.update(dt)
+         v.update(dt)
       end
 
       -- execute frame handled callbacks
       for i, v in pairs(self.keys) do
-	 local ret = (bool(v) and self[i]) and self[i](self) or nil
-	 if ret then return ret end
+         local ret = (bool(v) and self[i]) and self[i](self) or nil
+         if ret then return ret end
       end
 
       -- execute player handled callbacks
       for i, v in pairs(self.keys) do
-	 if bool(v) and self.player[i] then
-	    self.player[i](self.player)
-	 end
+         if bool(v) and self.player[i] then
+            self.player[i](self.player)
+         end
       end
       return self
    end
@@ -107,7 +136,7 @@ function frames.gameplay()
    function gameplay:draw()
       -- draw all entities
       for _, v in ipairs(self.items) do
-	 v.draw()
+         v.draw()
       end
    end
 

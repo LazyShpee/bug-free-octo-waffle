@@ -52,7 +52,7 @@ end
 function love.draw()
     love.graphics.push()
     love.graphics.scale(scale, scale)
-    love.graphics.setBackgroundColor(100, 100, 100)
+    -- love.graphics.setBackgroundColor(100, 100, 100)
     frame:draw()
     love.graphics.pop()
 end

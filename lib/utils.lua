@@ -35,15 +35,19 @@ function merge(dest, src)
 end
 
 function npairs(t, ...)
-  local i, a, k, v = 1, {...}
-  return
-    function()
-      repeat
-        k, v = next(t, k)
-        if k == nil then
-          i, t = i + 1, a[i]
-        end
-      until k ~= nil or not t
+   local args = { t, ... }
+   local i = 1
+   local k, v
+   return function()
+      k, v = next(t, k)
+      if not k then
+	 i, t = next(args, i)
+	 if i then
+	    k, v = next(t, k)
+	 end
+      end
       return k, v
-    end
+   end
 end
+
+-- for k, v in npairs({ 42, 69 }, { 360, 420 }) do print(k, v) end
