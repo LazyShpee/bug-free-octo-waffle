@@ -70,16 +70,16 @@ function frames.gameplay()
    for i in pairs(const.keys) do
       gameplay.keys[i] = const.keyup
    end
-   gameplay.player = require("player")
-   gameplay.entities = {}
 
-   function gameplay.entities:insert(item)
-      table.insert(self, item)
-   end
+   -- entities
+   gameplay.player = require("player")
+   gameplay.hhh = {}
+   gameplay.enemies = {}
+   gameplay.items = {}
 
    function gameplay:update(dt)
       -- update all entities
-      for _, v in ipairs(self.entities) do
+      for _, v in ipairs(self.items) do
 	 v.update(dt)
       end
 
@@ -100,7 +100,7 @@ function frames.gameplay()
 
    function gameplay:draw()
       -- draw all entities
-      for _, v in ipairs(self.entities) do
+      for _, v in ipairs(self.items) do
 	 v.draw()
       end
    end
@@ -110,6 +110,18 @@ function frames.gameplay()
       self.keys.retour = const.keyup
       self.freezed.freezed = self
       return self.freezed
+   end
+
+   function gameplay.hhh:insert(item)
+      table.insert(self, item)
+   end
+
+   function gameplay.enemies:insert(item)
+      table.insert(self, item)
+   end
+
+   function gameplay.items:insert(item)
+      table.insert(self, item)
    end
 
    return gameplay
