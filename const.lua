@@ -1,5 +1,10 @@
 local const = {}
 
+-- window constants
+const.width = 640
+const.height = 480
+const.title = "Scooter Rage 0.1.0"
+
 -- key status enum
 const.keyup = 0
 const.keydown = 1
@@ -17,5 +22,9 @@ const.keys =
       ["critique"] = "c",
       ["play"] = "return"
    }
+
+-- animation constants
+const.fps = 6
+const.delay = 1 / const.fps
 
 return const
