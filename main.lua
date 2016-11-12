@@ -20,7 +20,7 @@ function love.load()
    love.window.setMode(const.width * scale, const.height * scale)
    love.window.setTitle(const.title)
    frame = frames.menu()
-   assets = require("test").tilesets
+   assets = require("assets").tilesets
    for _, sprite in ipairs(assets) do
       frame.widgets:insert(widgets.button(widgets.sprite(sprite)))
    end
