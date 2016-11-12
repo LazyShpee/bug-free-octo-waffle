@@ -1,4 +1,7 @@
 local frames = {}
+local glow = require('glow')
+glow.init()
+glow.set({64, 224, 208})
 
 function frames.menu()
    local menu = {}
@@ -42,6 +45,9 @@ function frames.menu()
       -- draw all widgets
       for _, v in ipairs(self.widgets) do
 	 v.draw()
+      glow.set(true)
+	 v.draw()
+      glow.set(false)
       end
    end
 
@@ -104,7 +110,7 @@ function frames.gameplay()
 	 v.draw()
       end
    end
-   
+
 
    function gameplay:retour() -- pause game and come back to menu
       self.keys.retour = const.keyup
