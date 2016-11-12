@@ -72,8 +72,8 @@ function frames.menu()
       end
    end
 
-   function menu:play()
-      self.keys.play = const.keyup
+   function menu:select()
+      self.keys.select = const.keyup
       return self.widgets[self.cursor](self)
    end
 
