@@ -20,7 +20,7 @@ const.keys =
       ["sauter"] = "space",
       ["tricks"] = "d",
       ["critique"] = "c",
-      ["play"] = "return"
+      ["select"] = "return"
    }
 
 -- animation constants

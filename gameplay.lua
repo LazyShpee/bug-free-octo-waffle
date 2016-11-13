@@ -42,7 +42,7 @@ conf.player = {
 
 local roadSpeed = 200
 
-local state, km, scrollIndex, enemyCooldown
+local state, km, scrollIndex, enemyCooldown, ui
 local lvl = 1
 local scroll = {}
 local entities = {}
@@ -50,6 +50,7 @@ local scrollImg = {}
 
 -- sprites(name): function returning the sprite name as an 'anim' type
 function game:init(sprites)
+   ui = require('ui')
     -- scrollers
     scrollIndex = {bg = 0, wall = 10, road = 20, tree = 30, lamp = 40} -- z-order, 0 furthest, inf nearest
     scroll.bg = newScroller({sx = roadSpeed / 4 * 3})
@@ -159,8 +160,11 @@ function game:update(dt)
         game.makeEnemy()
     end
     if state == 'game' then
+       ui:update(dt, { score = 42/100, attention_derriere = 0.5, critiques = 42/100 })
         if entities.player.x < conf.player.deadX then
-            state = 'gameover'
+	   state = 'gameover'
+	   game.reset()
+	   return access.lose
         else
             if love.keyboard.isDown('right') and entities.player.x < conf.player.maxX then
                 entities.player.x = entities.player.x + dt * conf.player.speedY
@@ -193,15 +197,35 @@ function game:draw()
         end) do
         v.draw()
     end
+    ui:draw()
     love.graphics.print(#entities.."-"..entities.player.x.." - "..entities.player.lowY(), 100, 1)
 end
 
-function game:keypressed(key)
+function game:keypressed(key, scancode)
     if key == 'x' then
         if (lvl < 4) then
             lvl = lvl + 1
             game.changeLvl(lvl)
         end
+    end
+    if scancode == const.keys.retour then
+       access.game = self
+       if access.pause then
+	  return access.pause
+       else
+	  local ret = frames.menu()
+	  access.pause = ret
+	  local bg, continue, pimp, leave = unpack(require("assets/MENU_PAUSE").tilesets)
+	  local continuef = function(self)
+	     access.pause = self
+	     return access.game
+	  end
+	  ret.widgets:insert(widgets.button(widgets.sprite(bg)), ghost)
+	  ret.widgets:insert(widgets.button(widgets.sprite(continue)), continuef)
+	  ret.widgets:insert(widgets.button(widgets.sprite(pimp)), ghost)
+	  ret.widgets:insert(widgets.button(widgets.sprite(leave)), function() love.event.quit() end)
+	  return ret
+       end
     end
 end
 
