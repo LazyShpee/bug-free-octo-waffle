@@ -22,8 +22,6 @@ function ui:update(dt, opt)
    -- opt.combo: combo lol
    -- opt.vitesse: vitesse du scroll
 
-   opt.vitesse = 0
-   opt.attention_derriere = 1
    ui.score = opt.score
    ui.full_ad.x = ui.empty_ad.x +
       opt.attention_derriere * (self.empty_ad.tilewidth - self.full_ad.tilewidth)
