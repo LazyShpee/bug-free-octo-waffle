@@ -24,6 +24,7 @@ return function(opt)
         local w = love.window.getMode()
         local last = scroller[#scroller]
         local limit = 0
+	print(la.variable.type(last.img))
         while (limit < 100 and last.x + last.img:getWidth() + margin < w) do
             table.insert(scroller,
             {
@@ -61,13 +62,12 @@ return function(opt)
         end,
 
         draw =
-        function(offX, offY)
-            offX, offY = offX or 0, offY or 0
+        function()
             for i, item in ipairs(scroller) do
                 if (la.variable.type(item.img) == 'userdata') then
-                    love.graphics.draw(item.img, item.x + offX, item.y + offY)
-                elseif (la.variable.type(item.img) == 'sprite') then
-                    item.img:draw(item.x + offX, item.y + offY)
+                    love.graphics.draw(item.img, item.x, item.y)
+                elseif (la.variable.type(item.img) == 'anim') then
+                    item.img:draw(item.x, item.y)
                 end
             end
         end,

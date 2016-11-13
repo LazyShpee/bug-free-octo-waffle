@@ -12,17 +12,23 @@ function getIndex(t, item)
    return 0
 end
 
-function deepcopy(orig)
+function deepcopy(orig, nometa)
    if not orig then
       return
    end
-   local copy = {}
+   local copy, omt, cmt = {}
 
    if type(orig) == 'table' then
       for k, v in pairs(orig) do
-	 copy[deepcopy(k)] = deepcopy(v)
+	 copy[k] = deepcopy(v)
       end
-      setmetatable(copy, getmetatable(orig))
+      if not nometa then
+	 mt = getmetatable(orig)
+	 for k, v in pairs(mt) do
+	    cmt[k] = deepcopy(v)
+	 end
+	 setmetatable(copy, cmt)
+      end
    else
       copy = orig
    end
@@ -33,7 +39,12 @@ function merge(dest, src)
    for k, v in pairs(src) do
       dest[k] = v
    end
-   return dest
+   local dmt = getmetatable(dest) or {}
+   local smt = getmetatable(src) or {}
+   for k, v in pairs(smt) do
+      dmt[k] = v
+   end
+   return setmetatable(dest, dmt)
 end
 
 function npairs(t, ...)

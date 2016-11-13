@@ -4,9 +4,16 @@ local newEntity = require('entity')
 local la = require('lib/la')
 local game = {}
 
+local roadSpeed = 200
 local conf = { S = -1 }
+conf.speed = {
+    roadSpeed,
+    roadSpeed * 1.2,
+    roadSpeed * 1.4,
+    roadSpeed * 1.8
+}
+conf.phasesTime = { 0, 45.179 - 5, 76.957 - 5, 102.412 - 5}
 conf.enemies = {
-    phasesSample = { 0, 1, 5, 10 },
     order = {
         clochard = 1,
         policier = 2,
@@ -37,12 +44,11 @@ conf.player = {
     speedY = 80,
     deadX = 0,
     maxX = 270,
-    velXRedux = function(x) return x - 0.02 end
+    velYRedux = function(x) return x - 0.1 end,
+    velY = 4
 }
 
-local roadSpeed = 200
-
-local state, km, scrollIndex, enemyCooldown, ui
+local state, km, scrollIndex, enemyCooldown, music, ui
 local lvl = 1
 local scroll = {}
 local entities = {}
@@ -51,6 +57,9 @@ local scrollImg = {}
 -- sprites(name): function returning the sprite name as an 'anim' type
 function game:init(sprites)
    ui = require('ui')
+    --music
+    music = love.audio.newSource('music/MusiqueV2.wav')
+
     -- scrollers
     scrollIndex = {bg = 0, wall = 10, road = 20, tree = 30, lamp = 40} -- z-order, 0 furthest, inf nearest
     scroll.bg = newScroller({sx = roadSpeed / 4 * 3})
@@ -59,16 +68,15 @@ function game:init(sprites)
     scroll.tree = newScroller({sx = roadSpeed, margin = 50, offset = 130, rngX = {0,100}, rngY = {0,20}})
     scroll.lamp = newScroller({sx = roadSpeed * 1.02, margin = 100, offset = 200})
     -- load sprites, can be either path or AnAL 'anim'
-    scrollImg.bg = widgets.import("assets/BACKGROUNDS")
-       -- {
-    --     {'sprites/background.png'},
-    --     {'sprites/background_lvl2.png'},
-    --     {},
-    --     {}
-    -- }
+    scrollImg.bg =
+       {
+        {'sprites/background.png'},
+        {'sprites/background_lvl2.png'},
+        {},
+        {}
+    }
     scrollImg.wall = {
-       -- {'sprites/BATIMENT1.png', 'sprites/BATIMENT2.png', 'sprites/BATIMENT3.png'},
-       widgets.import("assets/BATIMENTS"),
+       {'sprites/BATIMENT1.png', 'sprites/BATIMENT2.png', 'sprites/BATIMENT3.png'},
        {},
        {},
        {}
@@ -111,30 +119,39 @@ function game.makeEnemy()
     for i, v in ipairs(rng) do rand = rand - v if rand <= 0 then sel = i break end end
     local name
     for i, v in pairs(conf.enemies.order) do if v == sel then name = i break end end
-    local ent = newEntity({hitbox = makeShape({0,0,0,0,0,0}),x = w, y = math.random(conf.player.minY, conf.player.maxY), type = name, sprite = newAnimation(enemies[name], 64, 64, 0.1, 0)})
+    local ent = newEntity({hitbox = makeShape({33,44,33+27,44,33+27,44+12,33,44+12}),x = w, y = math.random(conf.player.minY, conf.player.maxY), type = name, sprite = newAnimation(enemies[name], 64, 64, 0.1, 0)})
     table.insert(entities, ent)
 end
 
 function game.reset()
+    music:stop()
+    music:play()
     entities = {
         player = newEntity({
             sprite = newAnimation(love.graphics.newImage('sprites/trot.png'), 64, 64, 0.1, 1),
-            hitbox = makeShape({0, 0}), --, 20, 0, 20, 20, 20, 40, 10, 20, 0, 40}),
+            hitbox = makeShape({38, 52, 38+13, 52, 38+13, 52+4, 38, 52+4}),
             y = conf.player.startY,
             x = conf.player.maxX
         })
     }
     entities.player.addSprite(newAnimation(love.graphics.newImage('sprites/trot.png'), 64, 64, 0.1, 0), 'run')
     entities.player.velY = 0
-    entities.player.height = 0
+    entities.player.jump = 0
     entities.player.distance = 0
-    enemyCooldown = conf.enemies.coolDown
+    enemyCooldown = 3
+    levelDelay = -1
     lvl = 1
     game.changeLvl()
     state = 'game'
 end
 
 function game.changeLvl()
+    local newSpeed = conf.speed[lvl]
+    scroll.bg.setSpeed(newSpeed / 4 * 3)
+    scroll.wall.setSpeed(newSpeed)
+    scroll.road.setSpeed(newSpeed)
+    scroll.tree.setSpeed(newSpeed)
+    scroll.lamp.setSpeed(newSpeed * 1.02)
     for i, v in pairs(scroll) do
         v.flushPool()
         v.addImage(unpack(scrollImg[i][lvl]))
@@ -151,8 +168,13 @@ function game:update(dt)
             if v.x < -100 then
                 table.remove(entities, i)
             else
+                if conf.enemies.order[v.type] and not v.hit and (v + entities.player) then
+                    entities.player.x = entities.player.x - 25
+                    v.hit = true
+                    -- START COMBAT
+                end
                 local index = conf.enemies.order[v.type]
-                v.x = v.x + (conf.S + conf.enemies.speed[index]) * roadSpeed * dt
+                v.x = v.x + (conf.S + conf.enemies.speed[index]) * conf.speed[lvl] * dt
             end
         end
     end
@@ -161,6 +183,24 @@ function game:update(dt)
         enemyCooldown = conf.enemies.coolDown
         game.makeEnemy()
     end
+
+
+    ----- Sync music time with phases
+    local newLvl = lvl
+    local soundPos = music:tell()
+    for i, v in ipairs(conf.phasesTime) do
+        if (soundPos >= v) then
+            newLvl = i
+        end
+    end
+    if (newLvl ~= lvl) then
+        lvl = newLvl
+        game.changeLvl(lvl)
+        enemyCooldown = 5
+    end
+    -------------------------
+
+
     if state == 'game' then
        ui:update(dt, { score = 42/100, attention_derriere = 0.5, critiques = 42/100 })
         if entities.player.x < conf.player.deadX then
@@ -168,13 +208,17 @@ function game:update(dt)
 	   game.reset()
 	   return access.lose
         else
-            if love.keyboard.isDown('right') and entities.player.x < conf.player.maxX then
+            if entities.player.jump > 0 then entities.player.velY = conf.player.velYRedux(entities.player.velY) end
+            entities.player.jump = entities.player.jump + entities.player.velY
+            if entities.player.jump < 0 then entities.player.jump = 0 end
+
+            if entities.player.jump <= 0 and love.keyboard.isDown('right') and entities.player.x < conf.player.maxX then
                 entities.player.x = entities.player.x + dt * conf.player.speedY
                 entities.player.changeState('run')
             else
                 entities.player.changeState('idle')
             end
-                entities.player.x = entities.player.x + dt * conf.S * conf.player.speedY / 2
+            -- entities.player.x = entities.player.x + dt * conf.S * conf.player.speedY / 2
             if love.keyboard.isDown('up') and entities.player.lowY() > conf.player.minY then
                 entities.player.y = entities.player.y - dt * conf.player.speedY
             end
@@ -196,10 +240,10 @@ function game:draw()
         function (a, b)
             return entities[a].y + entities[a].getHeight() < entities[b].y + entities[b].getHeight()
         end) do
-        v.draw()
+        v.draw(0, type(i) ~= 'number' and -entities.player.jump or 0)
     end
     ui:draw()
-    love.graphics.print(#entities.."-"..entities.player.x.." - "..entities.player.lowY(), 100, 1)
+    love.graphics.print(entities.player.jump.." - "..entities.player.velY.." - "..music:tell(), 100, 1)
 end
 
 function game:keypressed(key, scancode)
@@ -207,7 +251,11 @@ function game:keypressed(key, scancode)
         if (lvl < 4) then
             lvl = lvl + 1
             game.changeLvl(lvl)
+            enemyCooldown = 5
         end
+    end
+    if state == 'game' and key == 'space' then
+       if entities.player.velY <= 0 then entities.player.velY = conf.player.velY end
     end
     if scancode == const.keys.retour then
        access.game = self

@@ -12,7 +12,6 @@ function widgets.sprite(t)
    )
    sprite.update = function(dt) sprite.anim:update(dt) end
    sprite.draw = function() sprite.anim:draw(sprite.x, sprite.y) end
-   sprite.getWidth = function(...) sprite.anim:getWidth(...) end
    sprite.x, sprite.y = 0, 0
    return sprite
 end
@@ -27,6 +26,7 @@ widgets.button = la.newFunctionOverLoad()
 
 widgets.button.addFunction({ "sprite" },
    function(sprite)
+      print(la.variable.type(sprite))
       return la.variable.setType(sprite, "button")
    end
 )

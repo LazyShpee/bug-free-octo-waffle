@@ -59,18 +59,18 @@ return function (opt)
     end
 
     function o.update(dt)
-        if la.variable.type(sprites[o.state]) == 'anim' or
+        if la.variable.type(sprites[o.state]) == 'sprite' or
        la.variable.type(sprites[o.state]) == 'sprite' then
             sprites[o.state]:update(dt)
         end
     end
 
-    function o.draw()
-       if la.variable.type(sprites[o.state]) == 'anim' or
-       la.variable.type(sprites[o.state]) == 'sprite' then
-            sprites[o.state]:draw(o.x, o.y)
+    function o.draw(offX, offY)
+        offX, offY = offX or 0, offY or 0
+        if la.variable.type(sprites[o.state]) == 'sprite' then
+            sprites[o.state]:draw(o.x + offX, o.y + offY)
         else
-            love.graphics.draw(sprites[o.state], o.x, o.y)
+            love.graphics.draw(sprites[o.state], o.x + offX, o.y + offY)
         end
         if (#hitbox >= 3) then
             love.graphics.polygon("fill", unpack(makePoints(o.getHitbox())))
