@@ -10,56 +10,59 @@ widgets = require("widgets")	-- widget complement to frames
 local newScroller = require('scroller')
 access = { game = require('gameplay') }
 scale = 1			-- adapt to high resolutions
+menuMusic = love.audio.newSource('music/MusiqueMenuV1.wav')
 
 local frame = {}
 
 function love.load()
-   local width, height = love.window.getDesktopDimensions()
-   scale = 1
-   while width > const.width * (scale + 1) or height > const.height * (scale + 1) do
-      scale = scale + 1
-   end
-   print(width, const.width, const.width * scale)
-   print(height, const.height, const.height * scale)
-   love.graphics.setDefaultFilter("nearest")
-   love.window.setMode(const.width * scale, const.height * scale)
-   love.window.setTitle(const.title)
+    menuMusic:play()
+    menuMusic:setVolume(0.2)
+    local width, height = love.window.getDesktopDimensions()
+    scale = 1
+    while width > const.width * (scale + 1) or height > const.height * (scale + 1) do
+        scale = scale + 1
+    end
+    print(width, const.width, const.width * scale)
+    print(height, const.height, const.height * scale)
+    love.graphics.setDefaultFilter("nearest")
+    love.window.setMode(const.width * scale, const.height * scale)
+    love.window.setTitle(const.title)
 
-   -- main menu loading
-   access.menu = frames.menu()
-   local bg, start, pimp, leave = unpack(widgets.import("assets/MENU_PRINCIPAL"))
-   local startf = function(self) return access.game end
-   access.menu.widgets:insert(widgets.button(bg), ghost)
-   access.menu.widgets:insert(widgets.button(start), startf)
-   access.menu.widgets:insert(widgets.button(pimp), ghost)
-   access.menu.widgets:insert(widgets.button(leave), function() love.event.quit() end)
-   frame = access.menu
+    -- main menu loading
+    access.menu = frames.menu()
+    local bg, start, pimp, leave = unpack(widgets.import("assets/MENU_PRINCIPAL"))
+    local startf = function(self) menuMusic:pause() access.game.reset() return access.game end
+    access.menu.widgets:insert(widgets.button(bg), ghost)
+    access.menu.widgets:insert(widgets.button(start), startf)
+    access.menu.widgets:insert(widgets.button(pimp), ghost)
+    access.menu.widgets:insert(widgets.button(leave), function() love.event.quit() end)
+    frame = access.menu
 
-   -- entities loading
-   -- OMG ICI JE LOAD LE MENU GAME OVER MAIS FAUT METTRE LE .LUA DES ENTITIES
-   local entities = widgets.import("assets/GAME_OVER_MENU")
-   for _, v in ipairs(entities) do
-      widgets.sprite(v)
-   end
-   local callback = function(self, name)
-      for _, v in ipairs(self) do
-	 if v.name == name then
-	    return deepcopy(v)
-	 end
-      end
-   end
-   addToMetatable(entities, "__index", callback)
-   access.game.init(entities)
+    -- entities loading
+    -- OMG ICI JE LOAD LE MENU GAME OVER MAIS FAUT METTRE LE .LUA DES ENTITIES
+    local entities = widgets.import("assets/GAME_OVER_MENU")
+    for _, v in ipairs(entities) do
+        widgets.sprite(v)
+    end
+    local callback = function(self, name)
+        for _, v in ipairs(self) do
+        if v.name == name then
+            return deepcopy(v)
+        end
+        end
+    end
+    addToMetatable(entities, "__index", callback)
+    access.game.init(entities)
 
-   -- game over loading
-   access.lose = frames.menu()
-   local bg, retry, pimp, menu = unpack(widgets.import("assets/GAME_OVER_MENU"))
-   local retryf = function(self) return access.game end
-   local menuf = function(self) return access.menu end
-   access.lose.widgets:insert(widgets.button(bg))
-   access.lose.widgets:insert(widgets.button(retry), retryf)
-   access.lose.widgets:insert(widgets.button(pimp), ghost)
-   access.lose.widgets:insert(widgets.button(menu), menuf)
+    -- game over loading
+    access.lose = frames.menu()
+    local bg, retry, pimp, menu = unpack(widgets.import("assets/GAME_OVER_MENU"))
+    local retryf = function(self) menuMusic:pause() access.game.reset() return access.game end
+    local menuf = function(self) menuMusic:play() access.game.stop() return access.menu end
+    access.lose.widgets:insert(widgets.button(bg))
+    access.lose.widgets:insert(widgets.button(retry), retryf)
+    access.lose.widgets:insert(widgets.button(pimp), ghost)
+    access.lose.widgets:insert(widgets.button(menu), menuf)
 end
 
 function love.update(dt)

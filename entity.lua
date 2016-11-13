@@ -60,7 +60,7 @@ return function (opt)
 
     function o.update(dt)
         if la.variable.type(sprites[o.state]) == 'sprite' or
-       la.variable.type(sprites[o.state]) == 'sprite' then
+        la.variable.type(sprites[o.state]) == 'sprite' then
             sprites[o.state]:update(dt)
         end
     end
@@ -73,7 +73,7 @@ return function (opt)
             love.graphics.draw(sprites[o.state], o.x + offX, o.y + offY)
         end
         if (#hitbox >= 3) then
-            love.graphics.polygon("fill", unpack(makePoints(o.getHitbox())))
+            --love.graphics.polygon("fill", unpack(makePoints(o.getHitbox())))
         end
     end
 
