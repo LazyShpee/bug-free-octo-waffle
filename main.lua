@@ -25,6 +25,7 @@ function love.load()
    love.window.setMode(const.width * scale, const.height * scale)
    love.window.setTitle(const.title)
 
+   -- main menu loading
    access.menu = frames.menu()
    local bg, start, pimp, leave = unpack(require("assets/MENU_PRINCIPAL").tilesets)
    local startf = function(self) return access.game end
@@ -34,6 +35,7 @@ function love.load()
    access.menu.widgets:insert(widgets.button(widgets.sprite(leave)), function() love.event.quit() end)
    frame = access.menu
 
+   -- entities loading
    -- OMG ICI JE LOAD LE MENU GAME OVER MAIS FAUT METTRE LE .LUA DES ENTITIES
    local entities = require("assets/GAME_OVER_MENU").tilesets
    for _, v in ipairs(entities) do
@@ -49,6 +51,7 @@ function love.load()
    addToMetatable(entities, "__index", callback)
    access.game.init(entities)
 
+   -- game over loading
    access.lose = frames.menu()
    local bg, retry, pimp, menu = unpack(require("assets/GAME_OVER_MENU").tilesets)
    local retryf = function(self) return access.game end
@@ -65,7 +68,7 @@ end
 
 function love.draw()
     love.graphics.push()
-    -- love.graphics.scale(scale)
+    love.graphics.scale(scale)
     frame:draw()
     love.graphics.pop()
 end

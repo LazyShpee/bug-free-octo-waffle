@@ -184,7 +184,6 @@ function game:update(dt)
 end
 
 function game:draw()
-    love.graphics.scale(scale, scale)
     love.graphics.push()
     love.graphics.translate(-600, 0)
     for i, v in la.table.pairsKeySorted(scroll, function (a, b) return scrollIndex[a] < scrollIndex[b] end) do
