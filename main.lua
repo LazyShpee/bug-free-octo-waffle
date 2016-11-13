@@ -4,70 +4,42 @@ const = require("const")	-- global constants variables
 
 la = require("lib/la")	-- lazyapi complement to lua
 u = require("lib/utils")		-- ironapi complement to lua
+local newScroller = require('scroller')
 
-frames = require("frames")	-- frame based engine complement to love
-widgets = require("widgets")	-- widget complement to frames
-local frame = {}
-
-scale = 1			-- adapt to high resolutions
+local gameFrame = require('gameplay')
+local frame = gameFrame
 
 function love.load()
-   local width, height = love.window.getDesktopDimensions()
-   if width >= const.width * 2 or height >= const.height * 2 then
-      scale = 2
-   end
-   love.graphics.setDefaultFilter("nearest")
-   love.window.setMode(const.width * scale, const.height * scale)
-   love.window.setTitle(const.title)
-   frame = frames.menu()
-   sprite = { -- this is temporary hardcoded I swear
-      name = "explosion", firstgid = 1,
-      tilewidth = 96, tileheight = 96,
-      spacing = 0, margin = 0,
-      image = "explosion.png",
-      imagewidth = 480,
-      imageheight = 288,
-      tileoffset = { x = 0, y = 0 },
-      properties = {},
-      terrains = {
-	 {
-	    name = "Nouveau terrain",
-	    tile = -1,
-	    properties = {}
-	 }
-      },
-      tilecount = 16,
-      tiles = {}
-   }
-   frame.widgets:insert(widgets.button(widgets.sprite(sprite)))
-   frame.widgets:insert(widgets.button(widgets.sprite(deepcopy(sprite))))
-   frame.widgets:insert(widgets.button(widgets.sprite(deepcopy(sprite))))
-   frame.widgets:insert(widgets.button(widgets.sprite(deepcopy(sprite))))
+    local width, height = love.window.getDesktopDimensions()
+    scale = 1
+    while width > const.width * (scale + 1) or height > const.height * (scale + 1) do
+        scale = scale + 1
+    end
+    print(width, const.width, const.width * scale)
+    print(height, const.height, const.height * scale)
+
+    love.graphics.setDefaultFilter("nearest")
+    love.window.setMode(const.width * scale, const.height * scale)
+    love.window.setTitle(const.title)
+    gameFrame.init()
 end
 
 function love.update(dt)
-   frame = frame:update(dt)
+    frame = frame:update(dt) or frame
 end
 
 function love.draw()
-   love.graphics.push()
-   love.graphics.scale(scale, scale)
-   frame:draw()
-   love.graphics.pop()
+    frame:draw()
 end
 
-function love.keypressed(_, scancode, isrepeat)
-   -- print(scancode)
-   -- for i, v in pairs(frame.keys) do print(i, v) end
-   frame.keys[getIndex(scancode)] = const.keydown + int(isrepeat)
-   -- print()
-   -- for i, v in pairs(frame.keys) do print(i, v) end
+function love.keypressed(...)
+    if (frame.keypressed) then
+        frame = frame:keypressed(...) or frame
+    end
 end
 
-function love.keyreleased(_, scancode)
-   -- print(scancode)
-   -- for i, v in pairs(frame.keys) do print(i, v) end
-   frame.keys[getIndex(scancode)] = const.keyup
-   -- print()
-   -- for i, v in pairs(frame.keys) do print(i, v) end
+function love.keyreleased(...)
+    if (frame.keyreleased) then
+        frame = frame:keyreleased(...) or frame
+    end
 end
