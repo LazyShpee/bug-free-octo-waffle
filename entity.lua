@@ -12,15 +12,19 @@ return function (opt)
         return sprites[o.state] and sprites[o.state]:getHeight() or 0
     end
 
-    function o.addSprite(sprite, label)
+    function o.addSprite(sprite, label, once)
         label = label or 'idle'
         sprites[label] = sprite
+        if (once) then
+            sprites[label]:setMode('once')
+        end
     end
 
     o.x = opt.x or 0
     o.y = opt.y - opt.sprite:getHeight() or 0
     o.type = opt.type or 'generic'
     o.state = opt.state or 'idle'
+    o.sprites = sprites
     setmetatable(o, mt)
 
     function mt.__add(e1, e2)

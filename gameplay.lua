@@ -53,7 +53,7 @@ conf.player = {
     velY = 4
 }
 
-local state, km, scrollIndex, enemyCooldown, music, ui, fails
+local state, km, scrollIndex, enemyCooldown, music, ui, fails, score
 local lvl = 1
 local scroll = {}
 local entities = {}
@@ -109,24 +109,24 @@ function game:init(sprites)
         {'sprites/background_lvl2.png'},
     }
     scrollImg.wall = {
-        {'sprites/BATIMENT1.png', 'sprites/BATIMENT2.png', 'sprites/BATIMENT3.png'},
-        {},
-        {'sprites/BATIMENT1.png', 'sprites/BATIMENT2.png', 'sprites/BATIMENT3.png'},
-        {},
+        {'sprites/BATIMENT1.png', 'sprites/BATIMENT2.png', 'sprites/BATIMENT3.png', 'sprites/BATIMENT4.png', 'sprites/BATIMENT5.png'},
+        {'sprites/BATIMENT_VIDE.png'},
+        {'sprites/BATIMENT1.png', 'sprites/BATIMENT2.png', 'sprites/BATIMENT3.png', 'sprites/BATIMENT4.png', 'sprites/BATIMENT5.png'},
+        {'sprites/BATIMENT_VIDE.png'},
     }
     scrollImg.road = {
         {'sprites/empty_road.png'},
         {'sprites/road_lvl2.png'},
         {'sprites/empty_road.png'},
         {'sprites/road_lvl2.png'},
-        {},
-        {}
+        {'sprites/BATIMENT_VIDE.png'},
+        {'sprites/BATIMENT_VIDE.png'}
     }
     scrollImg.tree = {
         {'sprites/tree.png'},
-        {},
+        {'sprites/BATIMENT_VIDE.png'},
         {'sprites/tree.png'},
-        {},
+        {'sprites/BATIMENT_VIDE.png'},
     }
     scrollImg.lamp = {
         {'sprites/lamp.png'},
@@ -135,12 +135,21 @@ function game:init(sprites)
         {'sprites/lamp.png'},
     }
     enemies = {
-        clochard = love.graphics.newImage('sprites/enemy_generic_idle.png'),
-        policier = love.graphics.newImage('sprites/enemy_generic_idle.png'),
-        vieille = love.graphics.newImage('sprites/enemy_generic_idle.png'),
-        trump = love.graphics.newImage('sprites/enemy_generic_idle.png'),
-        racaille = love.graphics.newImage('sprites/enemy_generic_idle.png')
+        clochard = love.graphics.newImage('sprites/clochard_avance.png'),
+        policier = love.graphics.newImage('sprites/policier_avance.png'),
+        vieille = love.graphics.newImage('sprites/vieux_avance.png'),
+        trump = love.graphics.newImage('sprites/trump_avance.png'),
+        racaille = love.graphics.newImage('sprites/racaille_avance.png')
     }
+
+    enemies_dead = {
+        clochard = love.graphics.newImage('sprites/clochard_mort.png'),
+        policier = love.graphics.newImage('sprites/policier_mort.png'),
+        vieille = love.graphics.newImage('sprites/vieux_mort.png'),
+        trump = love.graphics.newImage('sprites/trump_mort.png'),
+        racaille = love.graphics.newImage('sprites/racaille_mort.png')
+    }
+
     combatSprites.down = love.graphics.newImage('sprites/COMBAT_BAS.png')
     combatSprites.up = love.graphics.newImage('sprites/COMBAT_HAUT.png')
     combatSprites.right = love.graphics.newImage('sprites/COMBAT_GAUCHE.png')
@@ -172,22 +181,25 @@ function game.makeEnemy()
     local name
     for i, v in pairs(conf.enemies.order) do if v == sel then name = i break end end
     local ent = newEntity({hitbox = makeShape({33,44,33+27,44,33+27,44+12,33,44+12}),x = w, y = math.random(conf.player.minY, conf.player.maxY), type = name, sprite = newAnimation(enemies[name], 64, 64, 0.1, 0)})
+    ent.addSprite(newAnimation(enemies_dead[name], 64, 64, 0.1, 0), 'dead', true)
     table.insert(entities, ent)
 end
 
 function game.reset()
+    score = 0
     fails = 0
     music:stop()
     music:play()
     entities = {
         player = newEntity({
             sprite = newAnimation(love.graphics.newImage('sprites/trot.png'), 64, 64, 0.1, 1),
-            hitbox = makeShape({38, 52, 38+13, 52, 38+13, 52+4, 38, 52+4}),
+            hitbox = makeShape({23, 51, 23, 51+6, 23+12, 51+6, 23+12, 51}),
             y = conf.player.startY,
             x = conf.player.maxX
         })
     }
     entities.player.addSprite(newAnimation(love.graphics.newImage('sprites/trot.png'), 64, 64, 0.1, 0), 'run')
+    entities.player.addSprite(newAnimation(love.graphics.newImage('sprites/trot_tail.png'), 80, 64, 0.05, 0), 'tailwhip', true)
     entities.player.velY = 0
     entities.player.jump = 0
     entities.player.distance = 0
@@ -232,7 +244,9 @@ function game:update(dt)
                     game.makeNotes(4)
                 end
                 local index = conf.enemies.order[v.type]
-                v.x = v.x + (conf.S + conf.enemies.speed[index]) * conf.speed[lvl] * dt
+                if not(state == 'combat' and v == enemy) then
+                    v.x = v.x + (conf.S + conf.enemies.speed[index]) * conf.speed[lvl] * dt
+                end
             end
         end
     end
@@ -259,7 +273,8 @@ function game:update(dt)
     -------------------------
 
     if state == 'game' or state == 'combat' then
-        ui:update(dt, { score = 42/100, attention_derriere = entities.player.x / conf.player.maxX, critiques = 42/100 })
+        score = score + dt
+        ui:update(dt, { vitesse = lvl / 4, score = math.floor(score * 10), attention_derriere = 1 - entities.player.x / conf.player.maxX, critiques = 42/100 })
         if entities.player.x < conf.player.deadX then
             state = 'gameover'
             game.reset()
@@ -277,7 +292,9 @@ function game:update(dt)
                 sounds.roule:play()
             else
                 sounds.roule:pause()
-                entities.player.changeState('idle')
+                if (entities.player.jump <= 0 and entities.player.state ~= 'tailwhip') then
+                    entities.player.changeState('idle')
+                end
             end
             -- entities.player.x = entities.player.x + dt * conf.S * conf.player.speedY / 2
             if love.keyboard.isDown('up') and entities.player.lowY() > conf.player.minY then
@@ -290,6 +307,10 @@ function game:update(dt)
             if #notes == 0 then
                 state = 'game'
                 sounds.cri[math.random(#sounds.cri)]:play()
+                enemy.state = 'dead'
+                entities.player.sprites['tailwhip']:reset()
+                entities.player.sprites['tailwhip']:play()
+                entities.player.state = 'tailwhip'
             else
                 for i, v in pairs(notes) do
                     v.x = v.x - conf.speed[lvl] / 3 * dt
@@ -330,12 +351,12 @@ function game:draw()
         love.graphics.pop()
     end
     ui:draw()
-    love.graphics.print(lvl.." - "..state.." - "..entities.player.jump.." - "..entities.player.velY.." - "..music:tell(), 100, 1)
+    --love.graphics.print(lvl.." - "..state.." - "..entities.player.jump.." - "..entities.player.velY.." - "..music:tell(), 100, 1)
 end
 
 function game:keypressed(key, scancode)
     if state == 'game' and key == 'space' then
-        if entities.player.velY <= 0 then entities.player.velY = conf.player.velY sounds.saut:play() end
+        if entities.player.jump <= 0 then entities.player.velY = conf.player.velY sounds.saut:play() end
     elseif state == 'combat' then
         local where, which
         for i, v in pairs(notes) do
