@@ -29,7 +29,7 @@ function frames.menu()
       ct = 0
       for i, v in ipairs(self) do
 	 if i ~= 1 then
-	    v.x = (const.width - v.tilewidth) / 2
+	    v.x = (const.width - v.tilewidth) / 4 * 3
 	    v.y = offset * (i - 1) + ct
 	    ct = ct + v.tileheight
 	 end

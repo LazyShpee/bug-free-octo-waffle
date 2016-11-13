@@ -26,7 +26,6 @@ widgets.button = la.newFunctionOverLoad()
 
 widgets.button.addFunction({ "sprite" },
    function(sprite)
-      print(la.variable.type(sprite))
       return la.variable.setType(sprite, "button")
    end
 )

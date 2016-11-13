@@ -12,15 +12,15 @@ return {
   properties = {},
   tilesets = {
     {
-      name = "explosion",
+      name = "LOSE",
       firstgid = 1,
-      tilewidth = 96,
-      tileheight = 96,
+      tilewidth = 640,
+      tileheight = 480,
       spacing = 0,
       margin = 0,
-      image = "explosion.png",
-      imagewidth = 480,
-      imageheight = 288,
+      image = "LOSE.png",
+      imagewidth = 2560,
+      imageheight = 480,
       transparentcolor = "#ff00ff",
       tileoffset = {
         x = 0,
@@ -28,12 +28,12 @@ return {
       },
       properties = {},
       terrains = {},
-      tilecount = 15,
+      tilecount = 4,
       tiles = {}
     },
     {
       name = "Retry",
-      firstgid = 16,
+      firstgid = 5,
       tilewidth = 64,
       tileheight = 64,
       spacing = 0,
@@ -53,7 +53,7 @@ return {
     },
     {
       name = "Pimp your fckng trot",
-      firstgid = 20,
+      firstgid = 9,
       tilewidth = 64,
       tileheight = 64,
       spacing = 0,
@@ -73,7 +73,7 @@ return {
     },
     {
       name = "main menu",
-      firstgid = 24,
+      firstgid = 13,
       tilewidth = 64,
       tileheight = 64,
       spacing = 0,

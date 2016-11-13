@@ -24,7 +24,6 @@ return function(opt)
         local w = love.window.getMode()
         local last = scroller[#scroller]
         local limit = 0
-	print(la.variable.type(last.img))
         while (limit < 100 and last.x + last.img:getWidth() + margin < w) do
             table.insert(scroller,
             {

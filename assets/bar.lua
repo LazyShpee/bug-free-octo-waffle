@@ -50,6 +50,46 @@ return {
       terrains = {},
       tilecount = 6,
       tiles = {}
+    },
+    {
+      name = "ad_empty",
+      firstgid = 8,
+      tilewidth = 150,
+      tileheight = 24,
+      spacing = 0,
+      margin = 0,
+      image = "ad_empty.png",
+      imagewidth = 150,
+      imageheight = 24,
+      transparentcolor = "#ff00ff",
+      tileoffset = {
+        x = 0,
+        y = 0
+      },
+      properties = {},
+      terrains = {},
+      tilecount = 1,
+      tiles = {}
+    },
+    {
+      name = "ad_full",
+      firstgid = 9,
+      tilewidth = 55,
+      tileheight = 24,
+      spacing = 0,
+      margin = 0,
+      image = "ad_full.png",
+      imagewidth = 220,
+      imageheight = 24,
+      transparentcolor = "#ff00ff",
+      tileoffset = {
+        x = 0,
+        y = 0
+      },
+      properties = {},
+      terrains = {},
+      tilecount = 4,
+      tiles = {}
     }
   },
   layers = {
