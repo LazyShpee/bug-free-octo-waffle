@@ -64,11 +64,12 @@ return function (opt)
         end
     end
 
-    function o.draw()
+    function o.draw(offX, offY)
+        offX, offY = offX or 0, offY or 0
         if la.variable.type(sprites[o.state]) == 'anim' then
-            sprites[o.state]:draw(o.x, o.y)
+            sprites[o.state]:draw(o.x + offX, o.y + offY)
         else
-            love.graphics.draw(sprites[o.state], o.x, o.y)
+            love.graphics.draw(sprites[o.state], o.x + offX, o.y + offY)
         end
         if (#hitbox >= 3) then
             love.graphics.polygon("fill", unpack(makePoints(o.getHitbox())))

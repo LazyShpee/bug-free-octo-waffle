@@ -29,7 +29,10 @@ function love.update(dt)
 end
 
 function love.draw()
+    love.graphics.push()
+    love.graphics.scale(scale, scale)
     frame:draw()
+    love.graphics.pop()
 end
 
 function love.keypressed(...)

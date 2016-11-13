@@ -61,13 +61,12 @@ return function(opt)
         end,
 
         draw =
-        function(offX, offY)
-            offX, offY = offX or 0, offY or 0
+        function()
             for i, item in ipairs(scroller) do
                 if (la.variable.type(item.img) == 'userdata') then
-                    love.graphics.draw(item.img, item.x + offX, item.y + offY)
+                    love.graphics.draw(item.img, item.x, item.y)
                 elseif (la.variable.type(item.img) == 'anim') then
-                    item.img:draw(item.x + offX, item.y + offY)
+                    item.img:draw(item.x, item.y)
                 end
             end
         end,
