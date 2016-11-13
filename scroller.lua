@@ -49,7 +49,7 @@ return function(opt)
                 if (item.img:getWidth() + item.x < 0) then
                     table.remove(scroller, i)
                 end
-                if (la.variable.type(item.img) == 'anim') then
+                if (la.variable.type(item.img) == 'sprite') then
                     img:update(dt)
                 end
                 item.x, item.y = item.x - dt * sx, item.y - dt * sy
@@ -66,7 +66,7 @@ return function(opt)
             for i, item in ipairs(scroller) do
                 if (la.variable.type(item.img) == 'userdata') then
                     love.graphics.draw(item.img, item.x + offX, item.y + offY)
-                elseif (la.variable.type(item.img) == 'anim') then
+                elseif (la.variable.type(item.img) == 'sprite') then
                     item.img:draw(item.x + offX, item.y + offY)
                 end
             end
@@ -78,7 +78,7 @@ return function(opt)
             for i, img in ipairs(arg) do
                 if (la.variable.type(img) == 'string') then
                     table.insert(imagePool, love.graphics.newImage(img))
-                elseif (la.variable.type(img) == 'anim') then
+                elseif (la.variable.type(img) == 'sprite') then
                     table.insert(imagePool, img)
                 elseif (la.variable.type(img) == 'userdata') then
                     table.insert(imagePool, img)

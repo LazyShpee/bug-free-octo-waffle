@@ -59,17 +59,19 @@ function game:init(sprites)
     scroll.tree = newScroller({sx = roadSpeed, margin = 50, offset = 130, rngX = {0,100}, rngY = {0,20}})
     scroll.lamp = newScroller({sx = roadSpeed * 1.02, margin = 100, offset = 200})
     -- load sprites, can be either path or AnAL 'anim'
-    scrollImg.bg = {
-        {'sprites/background.png'},
-        {'sprites/background_lvl2.png'},
-        {},
-        {}
-    }
+    scrollImg.bg = widgets.import("assets/BACKGROUNDS")
+       -- {
+    --     {'sprites/background.png'},
+    --     {'sprites/background_lvl2.png'},
+    --     {},
+    --     {}
+    -- }
     scrollImg.wall = {
-        {'sprites/BATIMENT1.png', 'sprites/BATIMENT2.png', 'sprites/BATIMENT3.png'},
-        {},
-        {},
-        {}
+       -- {'sprites/BATIMENT1.png', 'sprites/BATIMENT2.png', 'sprites/BATIMENT3.png'},
+       widgets.import("assets/BATIMENTS"),
+       {},
+       {},
+       {}
     }
     scrollImg.road = {
         {'sprites/empty_road.png'},

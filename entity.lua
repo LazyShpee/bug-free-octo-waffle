@@ -52,20 +52,22 @@ return function (opt)
 
     function o.changeState(state)
         state = state or 'idle'
-        if state ~= o.state and sprites[state] and la.variable.type(sprites[state]) == 'anim' then
+        if state ~= o.state and sprites[state] and la.variable.type(sprites[state]) == 'sprite' then
             sprites[state]:reset()
         end
         o.state = state
     end
 
     function o.update(dt)
-        if la.variable.type(sprites[o.state]) == 'anim' then
+        if la.variable.type(sprites[o.state]) == 'anim' or
+       la.variable.type(sprites[o.state]) == 'sprite' then
             sprites[o.state]:update(dt)
         end
     end
 
     function o.draw()
-        if la.variable.type(sprites[o.state]) == 'anim' then
+       if la.variable.type(sprites[o.state]) == 'anim' or
+       la.variable.type(sprites[o.state]) == 'sprite' then
             sprites[o.state]:draw(o.x, o.y)
         else
             love.graphics.draw(sprites[o.state], o.x, o.y)

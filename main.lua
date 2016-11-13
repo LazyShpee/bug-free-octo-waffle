@@ -27,17 +27,17 @@ function love.load()
 
    -- main menu loading
    access.menu = frames.menu()
-   local bg, start, pimp, leave = unpack(require("assets/MENU_PRINCIPAL").tilesets)
+   local bg, start, pimp, leave = unpack(widgets.import("assets/MENU_PRINCIPAL"))
    local startf = function(self) return access.game end
-   access.menu.widgets:insert(widgets.button(widgets.sprite(bg)), ghost)
-   access.menu.widgets:insert(widgets.button(widgets.sprite(start)), startf)
-   access.menu.widgets:insert(widgets.button(widgets.sprite(pimp)), ghost)
-   access.menu.widgets:insert(widgets.button(widgets.sprite(leave)), function() love.event.quit() end)
+   access.menu.widgets:insert(widgets.button(bg), ghost)
+   access.menu.widgets:insert(widgets.button(start), startf)
+   access.menu.widgets:insert(widgets.button(pimp), ghost)
+   access.menu.widgets:insert(widgets.button(leave), function() love.event.quit() end)
    frame = access.menu
 
    -- entities loading
    -- OMG ICI JE LOAD LE MENU GAME OVER MAIS FAUT METTRE LE .LUA DES ENTITIES
-   local entities = require("assets/GAME_OVER_MENU").tilesets
+   local entities = widgets.import("assets/GAME_OVER_MENU")
    for _, v in ipairs(entities) do
       widgets.sprite(v)
    end
@@ -53,13 +53,13 @@ function love.load()
 
    -- game over loading
    access.lose = frames.menu()
-   local bg, retry, pimp, menu = unpack(require("assets/GAME_OVER_MENU").tilesets)
+   local bg, retry, pimp, menu = unpack(widgets.import("assets/GAME_OVER_MENU"))
    local retryf = function(self) return access.game end
    local menuf = function(self) return access.menu end
-   access.lose.widgets:insert(widgets.button(widgets.sprite(bg)))
-   access.lose.widgets:insert(widgets.button(widgets.sprite(retry)), retryf)
-   access.lose.widgets:insert(widgets.button(widgets.sprite(pimp)), ghost)
-   access.lose.widgets:insert(widgets.button(widgets.sprite(menu)), menuf)
+   access.lose.widgets:insert(widgets.button(bg))
+   access.lose.widgets:insert(widgets.button(retry), retryf)
+   access.lose.widgets:insert(widgets.button(pimp), ghost)
+   access.lose.widgets:insert(widgets.button(menu), menuf)
 end
 
 function love.update(dt)

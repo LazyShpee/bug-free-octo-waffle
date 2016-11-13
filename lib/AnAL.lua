@@ -60,7 +60,7 @@ function newAnimation(image, fw, fh, delay, frames)
 		table.insert(a.frames, frame)
 		table.insert(a.delays, delay)
 	end
-	animation.__typename = 'anim'
+	animation.__typename = 'sprite'
 	return setmetatable(a, animation)
 end
 

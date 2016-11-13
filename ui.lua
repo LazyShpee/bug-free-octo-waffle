@@ -1,9 +1,9 @@
 local ui = {}
 
 ui.sprites = {}
-ui.empty_score, ui.full_score = unpack(require('assets/bar').tilesets)
-ui.empty_score, ui.full_score = widgets.sprite(ui.empty_score), widgets.sprite(ui.full_score)
-local y = const.height - ui.empty_score.tileheight
+ui.empty_score, ui.full_score = unpack(widgets.import('assets/bar'))
+local x, y = ui.empty_score.tileheight, const.height - ui.empty_score.tileheight * 2
+ui.empty_score.x, ui.full_score.x = x, x
 ui.empty_score.y, ui.full_score.y = y, y
 ui.x = 0
 

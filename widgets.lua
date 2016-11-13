@@ -8,10 +8,11 @@ function widgets.sprite(t)
 	 love.graphics.newImage(assets_dir.."/"..sprite.image),
 	 sprite.tilewidth, sprite.tileheight,
 	 const.delay, 0
-      ), "anim"
+      ), "sprite"
    )
    sprite.update = function(dt) sprite.anim:update(dt) end
    sprite.draw = function() sprite.anim:draw(sprite.x, sprite.y) end
+   sprite.getWidth = function(...) sprite.anim:getWidth(...) end
    sprite.x, sprite.y = 0, 0
    return sprite
 end
@@ -37,5 +38,13 @@ widgets.button.addFunction({ "label" },
       return button
    end
 )
+
+function widgets.import(name)
+   local ret = require(name).tilesets
+   for _, v in ipairs(ret) do
+      widgets.sprite(v)
+   end
+   return ret
+end
 
 return widgets
