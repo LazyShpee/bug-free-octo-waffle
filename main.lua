@@ -19,7 +19,7 @@ function love.load()
     menuMusic:setVolume(0.2)
     local width, height = love.window.getDesktopDimensions()
     scale = 1
-    while width > const.width * (scale + 1) or height > const.height * (scale + 1) do
+    while width > const.width * (scale + 1) and height > const.height * (scale + 1) do
         scale = scale + 1
     end
     print(width, const.width, const.width * scale)
@@ -58,7 +58,7 @@ function love.load()
     -- pimp menu loading
     access.pimp = frames.menu()
     local pimp = widgets.import("assets/PIMP")[1]
-    access.pimp.widgets:insert(widgets.button(pimp))
+    access.pimp.widgets:insert(widgets.button(pimp), function(self) return access.menu end)
 
     -- game over loading
     access.lose = frames.menu()
