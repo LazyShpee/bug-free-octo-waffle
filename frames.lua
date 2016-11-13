@@ -63,6 +63,14 @@ function frames.menu()
       end
    end
 
+   function menu:keypressed(_, scancode, isreapeat)
+      self.keys[getIndex(const.keys, scancode)] = const.keydown + int(isrepeat)
+   end
+
+   function menu:keyreleased(_, scancode, isreapeat)
+      self.keys[getIndex(const.keys, scancode)] = const.keyup
+   end
+   
    function menu:select()
       self.keys.select = const.keyup
       return self.widgets[self.cursor](self)
@@ -100,18 +108,6 @@ function frames.gameplay()
    -- entities
    gameplay.player = require("player")
    gameplay.hhh = {}
-   gameplay.enemies = require("assets/GAME_OVER_MENU").tilesets
-   for _, v in ipairs(gameplay.enemies) do
-      widgets.sprite(v)
-   end
-   local callback = function(self, name)
-      for _, v in ipairs(self) do
-	 if v.name == name then
-	    return deepcopy(v)
-	 end
-      end
-   end
-   addToMetatable(gameplay.enemies, "__index", callback)
    gameplay.items = {}
 
    -- HUD
@@ -145,40 +141,6 @@ function frames.gameplay()
          v.draw()
       end
       self.ui:draw()
-   end
-
-
-   function gameplay:retour() -- pause game and come back to menu
-      self.keys.retour = const.keyup
-      access.game = self
-      if access.pause then
-	 return access.pause
-      else
-	 local ret = frames.menu()
-	 access.pause = ret
-	 local bg, continue, pimp, leave = unpack(require("assets/MENU_PAUSE").tilesets)
-	 local continuef = function(self)
-	    access.pause = self
-	    return access.game
-	 end
-	 ret.widgets:insert(widgets.button(widgets.sprite(bg)), ghost)
-	 ret.widgets:insert(widgets.button(widgets.sprite(continue)), continuef)
-	 ret.widgets:insert(widgets.button(widgets.sprite(pimp)), ghost)
-	 ret.widgets:insert(widgets.button(widgets.sprite(leave)), function() love.event.quit() end)
-	 return ret
-      end
-   end
-
-   function gameplay.hhh:insert(item)
-      table.insert(self, item)
-   end
-
-   function gameplay.enemies:insert(item)
-      table.insert(self, item)
-   end
-
-   function gameplay.items:insert(item)
-      table.insert(self, item)
    end
 
    return gameplay

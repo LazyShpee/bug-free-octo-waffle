@@ -37,6 +37,12 @@ return function(opt)
     end
 
     return la.variable.setType({
+        setSpeed = function(sp) sx = sp end,
+        index = opt.index or 1,
+        flushPool =
+        function()
+            imagePool = {}
+        end,
         update =
         function(dt)
             for i, item in ipairs(scroller) do
@@ -55,12 +61,13 @@ return function(opt)
         end,
 
         draw =
-        function()
+        function(offX, offY)
+            offX, offY = offX or 0, offY or 0
             for i, item in ipairs(scroller) do
                 if (la.variable.type(item.img) == 'userdata') then
-                    love.graphics.draw(item.img, math.floor(item.x), math.floor(item.y))
+                    love.graphics.draw(item.img, item.x + offX, item.y + offY)
                 elseif (la.variable.type(item.img) == 'anim') then
-                    item.img:draw(math.floor(item.x), math.floor(item.y))
+                    item.img:draw(item.x + offX, item.y + offY)
                 end
             end
         end,
@@ -72,6 +79,8 @@ return function(opt)
                 if (la.variable.type(img) == 'string') then
                     table.insert(imagePool, love.graphics.newImage(img))
                 elseif (la.variable.type(img) == 'anim') then
+                    table.insert(imagePool, img)
+                elseif (la.variable.type(img) == 'userdata') then
                     table.insert(imagePool, img)
                 end
             end
