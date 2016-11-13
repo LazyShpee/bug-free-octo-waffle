@@ -18,7 +18,7 @@ end
 
 function widgets.label()
    local label = la.variable.setType({}, "label")
-   
+
    return label
 end
 
@@ -26,7 +26,6 @@ widgets.button = la.newFunctionOverLoad()
 
 widgets.button.addFunction({ "sprite" },
    function(sprite)
-      print(la.variable.type(sprite))
       return la.variable.setType(sprite, "button")
    end
 )
@@ -34,7 +33,7 @@ widgets.button.addFunction({ "sprite" },
 widgets.button.addFunction({ "label" },
    function(label)
       local button = la.variable.setType(label, "button")
-      
+
       return button
    end
 )
