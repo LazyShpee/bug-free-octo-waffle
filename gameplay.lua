@@ -4,6 +4,8 @@ local newEntity = require('entity')
 local la = require('lib/la')
 local game = {}
 
+local sounds = {}
+
 local roadSpeed = 200
 local conf = { S = -1 }
 conf.speed = {
@@ -11,6 +13,9 @@ conf.speed = {
     roadSpeed * 1.2,
     roadSpeed * 1.4,
     roadSpeed * 1.8
+}
+conf.shaders = {
+    nil, nil, nil, nil
 }
 conf.phasesTime = { 0, 45.179 - 5, 76.957 - 5, 102.412 - 5}
 conf.enemies = {
@@ -48,17 +53,46 @@ conf.player = {
     velY = 4
 }
 
-local state, km, scrollIndex, enemyCooldown, music, ui
+local state, km, scrollIndex, enemyCooldown, music, ui, fails
 local lvl = 1
 local scroll = {}
 local entities = {}
 local scrollImg = {}
+local notes = {}
+local combatSprites = {}
+local combatBar = {}
+local combatDead
 
 -- sprites(name): function returning the sprite name as an 'anim' type
 function game:init(sprites)
-   ui = require('ui')
+    sounds.cri = {
+        love.audio.newSource('SD/cris-001.wav'),
+        love.audio.newSource('SD/cris-002.wav'),
+        love.audio.newSource('SD/cris-003.wav'),
+        love.audio.newSource('SD/cris-004.wav'),
+        love.audio.newSource('SD/cris-005.wav'),
+        love.audio.newSource('SD/cris-006.wav'),
+        love.audio.newSource('SD/cris-007.wav'),
+        love.audio.newSource('SD/cris-008.wav'),
+    }
+
+    sounds.punch = {
+        love.audio.newSource('SD/punch 1.wav'),
+        love.audio.newSource('SD/punch 2.wav')
+    }
+
+    sounds.saut = love.audio.newSource('SD/saut.wav')
+    sounds.roule = love.audio.newSource('SD/roule.wav')
+    sounds.roule:setLooping(true)
+
+    ui = require('ui')
     --music
     music = love.audio.newSource('music/MusiqueV2.wav')
+    music:setVolume(0.2)
+
+    w, h = love.window.getMode()
+    w = w / scale
+    h = h /scale
 
     -- scrollers
     scrollIndex = {bg = 0, wall = 10, road = 20, tree = 30, lamp = 40} -- z-order, 0 furthest, inf nearest
@@ -68,20 +102,21 @@ function game:init(sprites)
     scroll.tree = newScroller({sx = roadSpeed, margin = 50, offset = 130, rngX = {0,100}, rngY = {0,20}})
     scroll.lamp = newScroller({sx = roadSpeed * 1.02, margin = 100, offset = 200})
     -- load sprites, can be either path or AnAL 'anim'
-    scrollImg.bg =
-       {
+    scrollImg.bg = {
         {'sprites/background.png'},
         {'sprites/background_lvl2.png'},
-        {},
-        {}
+        {'sprites/background.png'},
+        {'sprites/background_lvl2.png'},
     }
     scrollImg.wall = {
-       {'sprites/BATIMENT1.png', 'sprites/BATIMENT2.png', 'sprites/BATIMENT3.png'},
-       {},
-       {},
-       {}
+        {'sprites/BATIMENT1.png', 'sprites/BATIMENT2.png', 'sprites/BATIMENT3.png'},
+        {},
+        {'sprites/BATIMENT1.png', 'sprites/BATIMENT2.png', 'sprites/BATIMENT3.png'},
+        {},
     }
     scrollImg.road = {
+        {'sprites/empty_road.png'},
+        {'sprites/road_lvl2.png'},
         {'sprites/empty_road.png'},
         {'sprites/road_lvl2.png'},
         {},
@@ -90,14 +125,14 @@ function game:init(sprites)
     scrollImg.tree = {
         {'sprites/tree.png'},
         {},
+        {'sprites/tree.png'},
         {},
-        {}
     }
     scrollImg.lamp = {
         {'sprites/lamp.png'},
         {'sprites/lamp.png'},
-        {},
-        {}
+        {'sprites/lamp.png'},
+        {'sprites/lamp.png'},
     }
     enemies = {
         clochard = love.graphics.newImage('sprites/enemy_generic_idle.png'),
@@ -106,9 +141,26 @@ function game:init(sprites)
         trump = love.graphics.newImage('sprites/enemy_generic_idle.png'),
         racaille = love.graphics.newImage('sprites/enemy_generic_idle.png')
     }
-    w, h = love.window.getMode()
-    w = w / 2
-    game.reset()
+    combatSprites.down = love.graphics.newImage('sprites/COMBAT_BAS.png')
+    combatSprites.up = love.graphics.newImage('sprites/COMBAT_HAUT.png')
+    combatSprites.right = love.graphics.newImage('sprites/COMBAT_GAUCHE.png')
+    combatSprites.d = love.graphics.newImage('sprites/COMBAT_D.png')
+    combatBar.sprite = newEntity({hitbox = makeShape({343, 0, 343 + 2, 0, 343 + 2, 0 + 16, 343, 0 + 16}),x = -100, y = h / 2, type = 'combatBar', sprite = love.graphics.newImage('sprites/BARRE_COMBAT.png')})
+    combatDead = newEntity({hitbox = makeShape({0,0,16,0,16,16,0,16}),x = 200, y = h / 2, type = 'deadZone', sprite = love.graphics.newImage('sprites/COMBAT_D.png')})
+end
+
+function game.makeNotes(n)
+    local names = {"down", "up", "right", "d"}
+    local lastX = 300
+    for i=1,n do
+        lastX = lastX + math.random(20, 40)
+        local name = names[math.random(#names)]
+        table.insert(notes, newEntity({
+            sprite = combatSprites[name],
+            x = lastX, y = h / 2, type = name,
+            hitbox = makeShape({-5,0,16,0,16,16,-5,16})
+        }))
+    end
 end
 
 function game.makeEnemy()
@@ -124,6 +176,7 @@ function game.makeEnemy()
 end
 
 function game.reset()
+    fails = 0
     music:stop()
     music:play()
     entities = {
@@ -143,6 +196,10 @@ function game.reset()
     lvl = 1
     game.changeLvl()
     state = 'game'
+end
+
+function game.stop()
+        music:stop()
 end
 
 function game.changeLvl()
@@ -168,10 +225,11 @@ function game:update(dt)
             if v.x < -100 then
                 table.remove(entities, i)
             else
-                if conf.enemies.order[v.type] and not v.hit and (v + entities.player) then
-                    entities.player.x = entities.player.x - 25
+                if entities.player.jump == 0 and state == 'game' and conf.enemies.order[v.type] and not v.hit and (v + entities.player) then
                     v.hit = true
-                    -- START COMBAT
+                    state = 'combat'
+                    enemy = v
+                    game.makeNotes(4)
                 end
                 local index = conf.enemies.order[v.type]
                 v.x = v.x + (conf.S + conf.enemies.speed[index]) * conf.speed[lvl] * dt
@@ -200,22 +258,25 @@ function game:update(dt)
     end
     -------------------------
 
-
-    if state == 'game' then
-       ui:update(dt, { score = 42/100, attention_derriere = 0.5, critiques = 42/100 })
+    if state == 'game' or state == 'combat' then
+        ui:update(dt, { score = 42/100, attention_derriere = entities.player.x / conf.player.maxX, critiques = 42/100 })
         if entities.player.x < conf.player.deadX then
-	   state = 'gameover'
-	   game.reset()
-	   return access.lose
-        else
+            state = 'gameover'
+            game.reset()
+            game.stop()
+            menuMusic:play()
+            return access.lose
+        elseif state == 'game' then
             if entities.player.jump > 0 then entities.player.velY = conf.player.velYRedux(entities.player.velY) end
-            entities.player.jump = entities.player.jump + entities.player.velY
+                entities.player.jump = entities.player.jump + entities.player.velY
             if entities.player.jump < 0 then entities.player.jump = 0 end
 
             if entities.player.jump <= 0 and love.keyboard.isDown('right') and entities.player.x < conf.player.maxX then
                 entities.player.x = entities.player.x + dt * conf.player.speedY
                 entities.player.changeState('run')
+                sounds.roule:play()
             else
+                sounds.roule:pause()
                 entities.player.changeState('idle')
             end
             -- entities.player.x = entities.player.x + dt * conf.S * conf.player.speedY / 2
@@ -224,6 +285,21 @@ function game:update(dt)
             end
             if love.keyboard.isDown('down') and entities.player.lowY() < conf.player.maxY then
                 entities.player.y = entities.player.y + dt * conf.player.speedY
+            end
+        elseif state == 'combat' then
+            if #notes == 0 then
+                state = 'game'
+                sounds.cri[math.random(#sounds.cri)]:play()
+            else
+                for i, v in pairs(notes) do
+                    v.x = v.x - conf.speed[lvl] / 3 * dt
+                    if v + combatDead then
+                        notes = {}
+                        entities.player.x = entities.player.x - 10 * fails
+                        fails = fails + 1
+                        state = 'game'
+                    end
+                end
             end
         end
     end
@@ -242,39 +318,60 @@ function game:draw()
         end) do
         v.draw(0, type(i) ~= 'number' and -entities.player.jump or 0)
     end
+    if (state == 'combat') then
+        love.graphics.push()
+        love.graphics.scale(3)
+        love.graphics.translate(-140, -150)
+        combatBar.sprite.draw()
+        for i, v in pairs(notes) do
+            v.draw()
+        end
+        --combatDead.draw()
+        love.graphics.pop()
+    end
     ui:draw()
-    love.graphics.print(entities.player.jump.." - "..entities.player.velY.." - "..music:tell(), 100, 1)
+    love.graphics.print(lvl.." - "..state.." - "..entities.player.jump.." - "..entities.player.velY.." - "..music:tell(), 100, 1)
 end
 
 function game:keypressed(key, scancode)
-    if key == 'x' then
-        if (lvl < 4) then
-            lvl = lvl + 1
-            game.changeLvl(lvl)
-            enemyCooldown = 5
+    if state == 'game' and key == 'space' then
+        if entities.player.velY <= 0 then entities.player.velY = conf.player.velY sounds.saut:play() end
+    elseif state == 'combat' then
+        local where, which
+        for i, v in pairs(notes) do
+            if v + combatBar.sprite then
+                which = v
+                where = i
+                break
+            end
+        end
+        if which and which.type == key then
+            table.remove(notes, where)
+            sounds.punch[math.random(2)]:play()
         end
     end
-    if state == 'game' and key == 'space' then
-       if entities.player.velY <= 0 then entities.player.velY = conf.player.velY end
-    end
     if scancode == const.keys.retour then
-       access.game = self
-       if access.pause then
-	  return access.pause
-       else
-	  local ret = frames.menu()
-	  access.pause = ret
-	  local bg, continue, pimp, leave = unpack(require("assets/MENU_PAUSE").tilesets)
-	  local continuef = function(self)
-	     access.pause = self
-	     return access.game
-	  end
-	  ret.widgets:insert(widgets.button(widgets.sprite(bg)), ghost)
-	  ret.widgets:insert(widgets.button(widgets.sprite(continue)), continuef)
-	  ret.widgets:insert(widgets.button(widgets.sprite(pimp)), ghost)
-	  ret.widgets:insert(widgets.button(widgets.sprite(leave)), function() love.event.quit() end)
-	  return ret
-       end
+        music:pause()
+        menuMusic:play()
+        access.game = self
+        if access.pause then
+	        return access.pause
+        else
+            local ret = frames.menu()
+            access.pause = ret
+            local bg, continue, pimp, leave = unpack(require("assets/MENU_PAUSE").tilesets)
+            local continuef = function(self)
+                access.pause = self
+                music:play()
+                menuMusic:pause()
+                return access.game
+            end
+            ret.widgets:insert(widgets.button(widgets.sprite(bg)), ghost)
+            ret.widgets:insert(widgets.button(widgets.sprite(continue)), continuef)
+            ret.widgets:insert(widgets.button(widgets.sprite(pimp)), ghost)
+            ret.widgets:insert(widgets.button(widgets.sprite(leave)), function() love.event.quit() end)
+            return ret
+        end
     end
 end
 
