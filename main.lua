@@ -32,9 +32,10 @@ function love.load()
     access.menu = frames.menu()
     local bg, start, pimp, leave = unpack(widgets.import("assets/MENU_PRINCIPAL"))
     local startf = function(self) menuMusic:pause() access.game.reset() return access.game end
-    access.menu.widgets:insert(widgets.button(bg), ghost)
+    local pimpf = function(self) return access.pimp end
+    access.menu.widgets:insert(widgets.button(bg))
     access.menu.widgets:insert(widgets.button(start), startf)
-    access.menu.widgets:insert(widgets.button(pimp), ghost)
+    access.menu.widgets:insert(widgets.button(pimp), pimpf)
     access.menu.widgets:insert(widgets.button(leave), function() love.event.quit() end)
     frame = access.menu
 
@@ -54,6 +55,11 @@ function love.load()
     addToMetatable(entities, "__index", callback)
     access.game.init(entities)
 
+    -- pimp menu loading
+    access.pimp = frames.menu()
+    local pimp = widgets.import("assets/PIMP")[1]
+    access.pimp.widgets:insert(widgets.button(pimp))
+
     -- game over loading
     access.lose = frames.menu()
     local bg, retry, pimp, menu = unpack(widgets.import("assets/GAME_OVER_MENU"))
@@ -61,7 +67,7 @@ function love.load()
     local menuf = function(self) menuMusic:play() access.game.stop() return access.menu end
     access.lose.widgets:insert(widgets.button(bg))
     access.lose.widgets:insert(widgets.button(retry), retryf)
-    access.lose.widgets:insert(widgets.button(pimp), ghost)
+    access.lose.widgets:insert(widgets.button(pimp), pimpf)
     access.lose.widgets:insert(widgets.button(menu), menuf)
 end
 
