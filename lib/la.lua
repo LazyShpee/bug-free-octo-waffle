@@ -159,7 +159,6 @@ function la.newFunctionOverLoad()
 		local arg = {...}
 		for k, v in ipairs(fn.functions) do
 		   local t, i = la.table.match(arg, v[1], function(a, b) return la.variable.type(a) == b end)
-		   if i then print("i = "..i) end
 		   if t or (i == #v[1] and v[1][#v[1]] == "...") then
 		      return v[2](unpack(arg))
 		   end

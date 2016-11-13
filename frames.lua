@@ -13,26 +13,28 @@ function frames.menu()
    menu.widgets = {}
 
    function menu.widgets:insert(item, callback)
-      local mt = getmetatable(item) or {}
-      setmetatable(item, mt)
-      if callback then
-	 mt.__call = function(item, self) return callback(self, item) end
-      else
-	 mt.__call = function(item, self) return menu.start(self, item) end
+      if not #self then
+	 return
       end
+      addToMetatable(item, "__call", function(item, self) return callback(self, item) end)
       table.insert(self, item)
+      print(item.name.." loaded !")
       local ct = 0
       for i, v in ipairs(self) do
-         ct = ct + v.tileheight
+	 if i ~= 1 then
+	    ct = ct + v.tileheight
+	 end
       end
-      local offset = (const.height - ct) / (#self + 1)
+      local offset = (const.height - ct) / (#self)
       ct = 0
       for i, v in ipairs(self) do
-         v.x = (const.width - v.tilewidth) / 2
-         v.y = offset * i + ct
-         ct = ct + v.tileheight
+	 if i ~= 1 then
+	    v.x = (const.width - v.tilewidth) / 2
+	    v.y = offset * (i - 1) + ct
+	    ct = ct + v.tileheight
+	 end
       end
-      menu.cursor = math.floor(#menu.widgets / 2) + 1
+      menu.cursor = math.floor((#self - 1) / 2) + 1
    end
 
    function menu:update(dt)
@@ -61,17 +63,6 @@ function frames.menu()
       end
    end
 
-   function menu:start(item)
-      -- create gameplay frame or restore paused frame
-      if self.freezed then
-         return self.freezed
-      else
-         local ret = frames.gameplay()
-         ret.freezed = self
-         return ret
-      end
-   end
-
    function menu:select()
       self.keys.select = const.keyup
       return self.widgets[self.cursor](self)
@@ -83,7 +74,7 @@ function frames.menu()
 
    function menu:haut()
       self.keys.haut = const.keyup
-      if self.widgets[self.cursor - 1] then
+      if self.widgets[self.cursor - 2] then
 	 self.cursor = self.cursor - 1
       end
    end
@@ -109,14 +100,29 @@ function frames.gameplay()
    -- entities
    gameplay.player = require("player")
    gameplay.hhh = {}
-   gameplay.enemies = {}
+   gameplay.enemies = require("assets/GAME_OVER_MENU").tilesets
+   for _, v in ipairs(gameplay.enemies) do
+      widgets.sprite(v)
+   end
+   local callback = function(self, name)
+      for _, v in ipairs(self) do
+	 if v.name == name then
+	    return deepcopy(v)
+	 end
+      end
+   end
+   addToMetatable(gameplay.enemies, "__index", callback)
    gameplay.items = {}
+
+   -- HUD
+   gameplay.ui = require("ui")
 
    function gameplay:update(dt)
       -- update all entities
       for _, v in ipairs(self.items) do
          v.update(dt)
       end
+      self.ui:update(dt, { score = 42/100, attention_derriere = 0.5, critiques = 42/100 })
 
       -- execute frame handled callbacks
       for i, v in pairs(self.keys) do
@@ -138,13 +144,29 @@ function frames.gameplay()
       for _, v in ipairs(self.items) do
          v.draw()
       end
+      self.ui:draw()
    end
 
 
    function gameplay:retour() -- pause game and come back to menu
       self.keys.retour = const.keyup
-      self.freezed.freezed = self
-      return self.freezed
+      access.game = self
+      if access.pause then
+	 return access.pause
+      else
+	 local ret = frames.menu()
+	 access.pause = ret
+	 local bg, continue, pimp, leave = unpack(require("assets/MENU_PAUSE").tilesets)
+	 local continuef = function(self)
+	    access.pause = self
+	    return access.game
+	 end
+	 ret.widgets:insert(widgets.button(widgets.sprite(bg)), ghost)
+	 ret.widgets:insert(widgets.button(widgets.sprite(continue)), continuef)
+	 ret.widgets:insert(widgets.button(widgets.sprite(pimp)), ghost)
+	 ret.widgets:insert(widgets.button(widgets.sprite(leave)), function() love.event.quit() end)
+	 return ret
+      end
    end
 
    function gameplay.hhh:insert(item)

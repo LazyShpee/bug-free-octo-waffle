@@ -2,7 +2,7 @@ local glow = {}
 
 function glow.init()
     glow.shader = love.graphics.newShader( "shaders/outline.glsl" )
-    glow.thick = 5/1300
+    glow.thick = 10/1300
     glow.rgb = {23, 45, 110}
 end
 
